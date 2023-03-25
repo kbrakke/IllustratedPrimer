@@ -1,19 +1,19 @@
-/* import { OpenAI } from 'openai-api';
+import { Configuration, OpenAIApi } from "openai";
+const configuration = new Configuration({
+    organization: process.env.OPENAPI_ORG,
+    apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
-    req.log.info(req);
+export async function askOpenAI(prompt: string): Promise<string> {
     const response = await openai.createCompletion({
         model: "text-curie-001",
-        prompt: `${req.body.prompt}`,
+        prompt: prompt,
         temperature: 0.8,
-        max_tokens: 60,
+        max_tokens: 250,
         top_p: 1.0,
         frequency_penalty: 0.5,
         presence_penalty: 0.0,
     });
-    if (response.status !== 200) {
-        res.log.error(response);
-        res.status(500).send('There was an error completing your text.');
-        return;
-    }
-    res.status(200).json(response.data);
-*/
+    return response.data.choices[0].text || "No response from OpenAI";
+};

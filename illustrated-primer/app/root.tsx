@@ -36,42 +36,17 @@ export default function App() {
     // 👆 false parameter is required for react project
   }, []);
   return (
-    <html className="h-full">
+    <html>
       <head>
-          <Meta />
-          <Links />
+        <Meta />
+        <Links />
       </head>
-      <body data-theme="garden" lang="en" className="h-full drawer">
-        <input id="my-drawer" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
-          <div className="navbar bg-base-100">
-            <div className="flex-none">
-              <label htmlFor="my-drawer" className="btn btn-square btn-ghost">
-                <HiMenuAlt2 />
-              </label>
-            </div>
-            <div className="flex-1">
-              <a className="btn btn-ghost normal-case text-xl">A Young Lady's Illustrated Primer</a>
-            </div>
-            <div className="flex-none">
-              <button className="btn btn-square btn-ghost">
-                <HiDotsVertical />
-              </button>
-            </div>
-          </div>
-          <div className="flex border-8">
-            <Outlet />
-            <ScrollRestoration />
-            <Scripts />
-            <LiveReload />
-          </div>
-        </div>
-        <div className="drawer-side">
-          <label htmlFor="my-drawer" className="drawer-overlay"></label>
-          <ul className="menu p-4 w-80 bg-base-100 text-base-content">
-            <li><a>Sidebar Item 1</a></li>
-            <li><a>Sidebar Item 2</a></li>
-          </ul>
+      <body>
+        <div>
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
         </div>
       </body>
     </html>

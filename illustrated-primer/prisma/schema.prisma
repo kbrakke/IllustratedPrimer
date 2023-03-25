@@ -17,6 +17,34 @@ model User {
   password Password?
 }
 
+model Page {
+  id         String @id @default(cuid())
+  story      Story  @relation(fields: [storyTitle], references: [title], onDelete: Cascade, onUpdate: Cascade)
+  storyTitle String
+  number     Int
+
+  prompt     String
+  completion String
+  image      String
+  pageName   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storyTitle, number], name: "page_number")
+}
+
+model Story {
+  id          String   @id @default(cuid())
+  title       String   @unique
+  author      String
+  description String
+  image       String
+  pages       Page[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Password {
   hash String
 
@@ -25,9 +53,9 @@ model Password {
 }
 
 model sttQuestion {
-  id    String @id @default(cuid())
-  question String
-  answer String
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

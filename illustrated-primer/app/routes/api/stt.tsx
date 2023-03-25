@@ -4,7 +4,7 @@ import pino from 'pino';
 import { useEffect, useState } from "react";
 import { FaMicrophone } from "react-icons/fa";
 import { GiSoundWaves } from "react-icons/gi";
-import { loader } from "..";
+import { loader } from "../_index";
 
 const logger = pino();
 
