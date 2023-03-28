@@ -13,17 +13,6 @@ async function seed() {
 
   const hashedPassword = await bcrypt.hash("racheliscool", 10);
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: {
-        create: {
-          hash: hashedPassword,
-        },
-      },
-    },
-  });
-
   await prisma.sttQuestion.create({
     data: {
       question: "What is the capital of France?",

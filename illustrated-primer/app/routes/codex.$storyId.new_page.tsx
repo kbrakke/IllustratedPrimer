@@ -12,8 +12,9 @@ export async function action({ request }: ActionArgs) {
   logger.info(request);
   logger.info('Fetching from Curie...');
   const form = await request.formData();
-  // const completion = askOpenAI(form.get('prompt') as string);
-  const completion = "This is a Debug Completion";
+  const completion = await askOpenAI(form.get('prompt') as string);
+  logger.info('Got response from Curie!');
+  logger.info(completion);
   return json({ completion });
 }
 
