@@ -19,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^4.9.0",
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "openai": "^3.2.1",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.7.13",

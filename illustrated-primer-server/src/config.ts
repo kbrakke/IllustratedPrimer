@@ -23,6 +23,7 @@ export type primerConfig = {
   azureSpeechRegion: string;
   openAPIOrg: string;
   openAPIKey: string;
+  port: number;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
 }
 
@@ -34,5 +35,6 @@ export const config: primerConfig = {
   azureSpeechRegion: getEnvString('SPEECH_REGION',  ''),
   openAPIOrg: getEnvString('OPENAPI_ORG',  ''),
   openAPIKey: getEnvString('OPENAI_API_KEY',  ''),
+  port: parseInt(getEnvString('PORT', '3001')),
   logLevel: 'info',
 }

@@ -32,8 +32,14 @@ router.post('/completion', (req, res, next) => {
 });
 
 router.post('/summary', (req, res, next) => {
-  req.log.info(`Asking chat gpt to summarize the following messages ${req.body.prompt}`);
-  const { prompt } = req.body;
+  req.log.info(`Asking chat gpt to summarize the following messages ${req.body.prompt}, ${req.body.completion}`);
+  const { prompt, completion } = req.body;
+  if (!prompt || !completion) {
+    res.status(400).send({
+      reason: 'Value "prompt" or "completion" is missing from request body'
+    });
+  };
+  
 
 });
 
