@@ -1,0 +1,6 @@
+{
+  "name": "illustrated-primer",
+  "dependencies": {
+    "pm2": "^5.1.3"
+  }
+}
