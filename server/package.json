@@ -7,12 +7,11 @@
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
     "debug": "NODE_ENV=development nodemon src/app.ts",
-    "dev": "NODE_ENV=development ./node_modules/.bin/pm2 start src/app.ts --name illustrated-primer --watch",
+    "dev": "NODE_ENV=development nodemon src/app.ts",
     "build": "tsc",
     "lint": "eslint --ext .ts src",
-    "start": "pm2 start ts-node -- dist/app.js --name illustrated-primer --watch",
-    "test": "jest",
-    "postinstall": "./node_modules/.bin/pm2 install typescript"
+    "start": "nodemon -- dist/app.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "openai": "^3.2.1",
+    "openai": "^4.0.0",
     "pino": "^8.11.0",
     "pino-http": "^8.3.3",
     "pino-pretty": "^10.2.3"
@@ -47,7 +46,6 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "jest": "^27.4.3",
     "nodemon": "^2.0.22",
-    "pm2": "^5.1.3",
     "prisma": "^4.9.0",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.9.1",

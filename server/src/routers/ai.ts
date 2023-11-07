@@ -47,7 +47,7 @@ router.post('/completion', (req, res, next) => {
   The child's story is as follows: ${prompt}
   Continue the above prompt then allow the child to continue their story.`;
   completePrompt(enrichedPrompt).then(function (data) {
-    res.send(data.choices[0]).status(200).end()
+    res.send({ text: data.text.trim() }).status(200).end()
   }).catch(next)
 });
 
@@ -60,7 +60,16 @@ router.post('/summary', (req, res, next) => {
     });
   };
   summarizePrompt(prompt, completion).then(function (data) {
-    res.send(data.choices[0].text).status(200).end()
+    const summary = data.message.content?.trim();
+    const secondPassSummary = summary?.slice(summary.indexOf('{'), summary.lastIndexOf('}') + 1);
+    req.log.info(`Summary: ${secondPassSummary}`);
+    if (!secondPassSummary) {
+      res.status(500).send({
+        reason: 'No summary was generated'
+      });
+    } else {
+      res.send(JSON.parse(secondPassSummary)).status(200).end()
+    }
   }).catch(next);
 });
 
@@ -73,7 +82,7 @@ router.post('/image', (req, res, next) => {
     });
   }
   generateImage(prompt).then(function (data) {
-    res.send(data.data[0]).status(200).end()
+    res.send(data).status(200).end()
   }).catch(next);
 });
 
