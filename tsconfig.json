@@ -8,7 +8,6 @@
       "DOM.Iterable"
     ],
     "module": "ESNext",
-    "moduleDetection": "auto",
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "node",
@@ -24,7 +23,8 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src"
+    "ui/src",
+    "server/src"
   ],
   "references": [
     {

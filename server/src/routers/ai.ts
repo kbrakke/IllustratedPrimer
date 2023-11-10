@@ -32,7 +32,7 @@ router.get('/models', (req, res, next) => {
 router.post('/completion', (req, res, next) => {
   req.log.info(`Asking chat gpt using the following prompt ${JSON.stringify(req.body)}`);
   const { prompt } = req.body;
-  if (!prompt) {
+  if (!prompt || prompt === "") {
     res.status(400).send({
       reason: 'Value "prompt" is missing from request body'
     });
@@ -47,7 +47,7 @@ router.post('/completion', (req, res, next) => {
   The child's story is as follows: ${prompt}
   Continue the above prompt then allow the child to continue their story.`;
   completePrompt(enrichedPrompt).then(function (data) {
-    res.send({ text: data.text.trim() }).status(200).end()
+    res.send({ text: data.message?.content?.trim() }).status(200).end()
   }).catch(next)
 });
 

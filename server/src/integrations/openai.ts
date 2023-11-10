@@ -11,14 +11,17 @@ export async function listModels(): Promise<OpenAI.Models.Model[]> {
   return response.data;
 }
 
-export async function completePrompt(prompt: string): Promise<OpenAI.Completions.CompletionChoice> {
+export async function completePrompt(prompt: string): Promise<OpenAI.Chat.Completions.ChatCompletion.Choice> {
   const openai = new OpenAI({
     organization: config.openAPIOrg,
     apiKey: config.openAPIKey,
   });
-  const response = await openai.completions.create({
-    model: "text-davinci-003",
-    prompt,
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo-1106",
+    messages: [{
+      role: "user",
+      content: prompt
+    }],
     max_tokens: 1000,
     temperature: 0,
   });

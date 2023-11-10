@@ -1,4 +1,6 @@
-function Completion({ completion }) {
+import React from 'react'
+
+const Completion = ({ completion }) => {
   return (
     <p>{completion}</p>
   )
