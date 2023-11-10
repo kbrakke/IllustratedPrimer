@@ -7,10 +7,16 @@ import SubmitButton from "./components/SubmitButton";
 import Next from "./components/Next";
 import Prev from "./components/Prev";
 import SaveButton from "./components/SaveButton";
+import AuthorList from "./components/AuthorList";
+import PageList from "./components/PageList";
+import StoryList from "./components/StoryList";
 
 function App() {
   const [prompt, setPrompt] = useState("");
   const [completion, setCompletion] = useState("Waiting for Response");
+  const [authorsList, setAuthorsList] = useState([]);
+  const [pages, setPages] = useState([]);
+  const [stories, setStories] = useState([]);
   const [waitingForSummary, setWaitingForSummary] = useState(false);
   const [summary, setSummary] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
@@ -52,6 +58,23 @@ function App() {
   const handleSave = async () => {
     console.log("saving");
   }
+
+  useEffect(async () => {
+    const authorsResponse = await fetch(`http://localhost:3001/authors`);
+    setAuthorsList(await authorsResponse.json());
+    authorsList.forEach(author => {
+      fetch(`http://localhost:3001/stories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ authorId: author.id })
+      }).then(response => response.json()).then(body => {
+        setStories(body);
+      });
+    });
+  }, []);
+
   useEffect(() => {
     if (imagePrompt === "") return;
     fetch(`http://localhost:3001/ai/image`, {
@@ -68,7 +91,12 @@ function App() {
 
   return (
     <div className="w-screen h-screen flex">
-      <div><Prev /></div>
+      <div>
+        <Prev />
+        <AuthorList authors={authorsList} />
+        <PageList pages={pages} />
+        <StoryList stories={stories} />
+      </div>
       <div className="flex-1 border-8 border-red-500 h-5/6">
         <h2>Prompt</h2>
         <Prompt prompt={prompt} handleChange={handleChange} />
@@ -86,7 +114,7 @@ function App() {
         <Summary summary={summary} />
         <SaveButton handleSave={handleSave} />
       </div>
-      <div><Next /></div>
+      <Next className="flex h-1/2" />
     </div>
   )
 }

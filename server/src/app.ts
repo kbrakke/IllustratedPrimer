@@ -4,6 +4,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { ai } from './routers/ai';
 import { authors } from './routers/authors';
+import { stories } from './routers/stories';
+import { pages } from './routers/pages';
 import { config } from './config';
 
 
@@ -32,3 +34,5 @@ app.listen(port, () => {
 
 app.use('/ai', ai);
 app.use('/authors', authors);
+app.use('/stories', stories);
+app.use('/pages', pages);
