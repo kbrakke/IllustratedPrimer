@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 
 interface SubmitButtonProps {
   prompt: string;
-  handleSubmit: () => void;
+  handleSubmit: MouseEventHandler<HTMLButtonElement>;
 }
 
 const SubmitButton = (props: SubmitButtonProps) => {
   const { prompt, handleSubmit } = props;
   return (
     <button
+      className='right=0'
       id="prompt"
       name="prompt"
       value={prompt}

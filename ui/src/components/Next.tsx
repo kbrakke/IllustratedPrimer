@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Next = () => {
+const Next = ({ handleNext }) => {
   return (
-    <button>Next</button>
+    <button className="flex h-1/2" onClick={handleNext}>Next</button>
   )
 }
 

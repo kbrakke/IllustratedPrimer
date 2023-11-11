@@ -46,11 +46,9 @@ router.post('/', (req, res, next) => {
 
 router.post('/create', (req, res, next) => {
   req.log.info('Creating a page');
-  const input: Prisma.PageCreateInput = req.body;
-  const storyId = (input.story.create?.id)
-    ? input.story.create.id : '';
+  const { storyId, ...input }: Prisma.PageCreateInput & { storyId: string } = req.body
   if (isEmpty(storyId)) {
-    res.send('Story id (story.create.id) is required').status(400).end();
+    res.send('Story id (storyId) is required').status(400).end();
   }
   createPageForStoryId(storyId, input).then((data) => {
     res.send(data).status(200).end();

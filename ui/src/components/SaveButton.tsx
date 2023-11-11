@@ -1,8 +1,8 @@
 import React from 'react'
 
-const SaveButton = ({ handleSave }) => {
+const SaveButton = ({ disabled, handleSave }) => {
   return (
-    <button onClick={handleSave}>SaveButton</button>
+    <button className='disabled:opacity-75 disabled:bg-gray-500 disabled:border-transparent disabled:hover:border-transparent enabled:hover:border-blue-500' disabled={disabled} onClick={handleSave}>SaveButton</button>
   )
 }
 

@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Prev = () => {
+const Prev = ({ handlePrev }) => {
   return (
-    <button>Prev</button>
+    <button onClick={handlePrev}>Prev</button>
   )
 }
 
