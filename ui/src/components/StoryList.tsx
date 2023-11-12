@@ -1,10 +1,15 @@
-import React from 'react'
+import { Story } from "../App"
 
-const StoryList = ({ stories }) => {
+interface StoryListProps {
+  stories: Story[]
+}
+
+const StoryList = (props: StoryListProps) => {
+  const { stories } = props
   return (
     <ul>
       {stories.map((story) => (
-        <li key={story.id}>{story.title}<br />{story.author}</li>
+        <li key={story.id}>{story.title}<br />{story.authorId}</li>
       ))}
     </ul>
   )

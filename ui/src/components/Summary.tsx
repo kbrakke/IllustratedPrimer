@@ -1,6 +1,10 @@
-import React from 'react'
 
-const Summary = ({ summary }) => {
+interface SummaryProps {
+  summary: string
+}
+
+const Summary = (props: SummaryProps) => {
+  const { summary } = props
   return (
     <div>{summary}</div>
   )

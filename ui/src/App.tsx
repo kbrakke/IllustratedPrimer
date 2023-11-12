@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Next from "./components/Next";
 import Prev from "./components/Prev";
 import DebugCurrentState from "./components/DebugCurrentState";
 import CompletedPage from "./components/CompletedPage";
 import NewPage from "./components/NewPage";
+import SideBar from "./components/SideBar";
+import PageButton from "./components/PageButton";
 import { isEmpty, isNil } from "lodash";
+import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
+const debug: boolean = import.meta.env.VITE_DEBUG === "true";
 
 export interface Author {
   id: string;
@@ -40,10 +44,9 @@ export interface CurrentState {
 }
 
 function App() {
-  const [authorsList, setAuthorsList] = useState<Author[]>([]);
+  const [, setAuthorsList] = useState<Author[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
-  const [stories, setStories] = useState<Story[]>([]);
-  const [hasNext, setHasNext] = useState<boolean>(false);
+  const [, setStories] = useState<Story[]>([]);
   const [currentState, setCurrentState] = useState<CurrentState>({
     page: {
       id: "",
@@ -94,7 +97,6 @@ function App() {
         author: authorsJson[0],
         story: storiesJson[0],
       });
-      setHasNext(!!pagesJson[1]);
     }
     fetchInitialInfo();
   }, []);
@@ -113,11 +115,9 @@ function App() {
     }
     if (currentState.story.id === "" || currentState.story.id === undefined) return;
     updatePages();
-    console.log(pages);
   }, [currentState]);
 
   const handleNext = async () => {
-    console.log("next");
     if (currentState.page.number === pages.length) return;
     const nextPage = pages[currentState.page.number];
     setCurrentState({
@@ -128,7 +128,6 @@ function App() {
   }
 
   const handlePrev = async () => {
-    console.log("prev");
     if (currentState.page.number === 1) return;
     const prevPage = pages[currentState.page.number - 2];
     setCurrentState({
@@ -140,17 +139,16 @@ function App() {
 
   return (
     <div className="w-screen h-screen flex">
-      <Prev handlePrev={handlePrev} />
-      {import.meta.env.VITE_DEBUG && <div className="flex-1">
-        <DebugCurrentState currentState={currentState} />
-      </div>}
+      <SideBar />
+      <div className="ml-16"><PageButton handleClick={handlePrev} icon={<MdNavigateBefore size="32" />} left={true} /></div>
+      {debug && <div className="flex-1"><DebugCurrentState currentState={currentState} /></div>}
       {isEmpty(pages)
         ? <><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
         : !isNil(pages[currentState?.page?.number])
-          ? <><CompletedPage page={currentState.page} /><CompletedPage page={pages[currentState.page.number]} /></>
-          : <><CompletedPage page={currentState.page} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
+          ? <><CompletedPage page={currentState.page} initialDelay={0} /><CompletedPage page={pages[currentState.page.number]} initialDelay={8000} /></>
+          : <><CompletedPage page={currentState.page} initialDelay={0} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
       }
-      <Next handleNext={handleNext} />
+      <PageButton handleClick={handleNext} icon={<MdNavigateNext size="32" />} left={false} />
     </div>
   )
 }

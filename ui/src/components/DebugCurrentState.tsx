@@ -1,4 +1,3 @@
-import React from 'react'
 import { CurrentState } from '../App'
 import { isEmpty } from 'lodash'
 

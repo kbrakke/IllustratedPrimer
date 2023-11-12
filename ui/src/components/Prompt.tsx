@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface PromptProps {
   prompt: string;
   handleChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;

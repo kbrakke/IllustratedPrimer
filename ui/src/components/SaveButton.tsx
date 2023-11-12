@@ -1,6 +1,10 @@
-import React from 'react'
+interface SaveButtonProps {
+  disabled: boolean;
+  handleSave: React.MouseEventHandler<HTMLButtonElement>
+}
 
-const SaveButton = ({ disabled, handleSave }) => {
+const SaveButton = (props: SaveButtonProps) => {
+  const { disabled, handleSave } = props;
   return (
     <button className='disabled:opacity-75 disabled:bg-gray-500 disabled:border-transparent disabled:hover:border-transparent enabled:hover:border-blue-500' disabled={disabled} onClick={handleSave}>SaveButton</button>
   )

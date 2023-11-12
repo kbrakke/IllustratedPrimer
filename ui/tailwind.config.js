@@ -5,8 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        storybook: ["Quintessential", "serif"]
+      },
+    },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animated')],
 }
 

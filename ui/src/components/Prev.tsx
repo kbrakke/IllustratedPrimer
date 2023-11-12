@@ -1,8 +1,13 @@
-import React from 'react'
+import { MdNavigateBefore } from 'react-icons/md'
 
-const Prev = ({ handlePrev }) => {
+interface PrevProps {
+  handlePrev: React.MouseEventHandler<HTMLButtonElement>
+}
+
+const Prev = (props: PrevProps) => {
+  const { handlePrev } = props;
   return (
-    <button onClick={handlePrev}>Prev</button>
+    <button className="h-auto m-0 ml-16" onClick={handlePrev}><MdNavigateBefore size="32" /></button>
   )
 }
 

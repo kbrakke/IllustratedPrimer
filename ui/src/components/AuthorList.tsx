@@ -1,6 +1,12 @@
-import React from 'react'
+import { Author } from "../App"
 
-const AuthorList = ({ authors }) => {
+interface AuthorListProps {
+  authors: Author[]
+}
+
+
+const AuthorList = (props: AuthorListProps) => {
+  const { authors } = props;
   return (
     <ul>
       {authors.map((author) => (

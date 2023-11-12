@@ -1,8 +1,13 @@
-import React from 'react'
+import { MdNavigateNext } from 'react-icons/md'
 
-const Next = ({ handleNext }) => {
+interface NextProps {
+  handleNext: React.MouseEventHandler<HTMLButtonElement>
+}
+
+const Next = (props: NextProps) => {
+  const { handleNext } = props;
   return (
-    <button className="flex h-1/2" onClick={handleNext}>Next</button>
+    <button className="bg-orange-200" onClick={handleNext}><MdNavigateNext size="32" /></button>
   )
 }
 

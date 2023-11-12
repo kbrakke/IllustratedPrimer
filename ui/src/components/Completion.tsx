@@ -1,6 +1,9 @@
-import React from 'react'
+interface CompletionProps {
+  completion: string;
+}
 
-const Completion = ({ completion }) => {
+const Completion = (props: CompletionProps) => {
+  const { completion } = props;
   return (
     <p>{completion}</p>
   )

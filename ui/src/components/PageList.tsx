@@ -1,6 +1,11 @@
-import React from 'react'
+import { Page } from "../App"
 
-const PageList = ({ pages }) => {
+interface PageListProps {
+  pages: Page[]
+}
+
+const PageList = (props: PageListProps) => {
+  const { pages } = props
   return (
     <ul>
       {pages.map((page) => (
