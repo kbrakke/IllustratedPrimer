@@ -20,7 +20,7 @@ app.use(pino({
     }
   }
 }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cors());
 
 app.get('/', (req, res) => {

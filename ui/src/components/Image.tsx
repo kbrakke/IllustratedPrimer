@@ -8,8 +8,9 @@ interface ImageProps {
 const Image = (props: ImageProps) => {
   const { image, imagePrompt } = props;
   if (image !== "") {
+    const b64Image = `data:image/png;base64,${image}`;
     return (
-      <img src={image} alt={imagePrompt} />
+      <img src={b64Image} alt={imagePrompt} />
     )
   } else return null;
 }

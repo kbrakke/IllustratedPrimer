@@ -6,7 +6,14 @@ import SaveButton from './SaveButton'
 import Image from './Image'
 
 
-const NewPage = () => {
+interface NewPageProps {
+  pageCount: number;
+  currentState: any;
+  setCurrentState: any;
+}
+
+const NewPage = (props: NewPageProps) => {
+  const { pageCount, currentState, setCurrentState } = props;
   const [prompt, setPrompt] = useState("");
   const [completion, setCompletion] = useState("Waiting for Response");
   const [waitingForSummary, setWaitingForSummary] = useState(false);
@@ -46,6 +53,13 @@ const NewPage = () => {
     setWaitingForSummary(false);
   }
 
+  const resetFields = () => {
+    setPrompt("");
+    setCompletion("");
+    setSummary("");
+    setImage("");
+  }
+
   const handleSave = async () => {
     console.log("saving");
     async function savePrompt() {
@@ -59,8 +73,8 @@ const NewPage = () => {
           completion: completion,
           summary: summary,
           image: image,
-          number: (pages?.length || 0) + 1,
-          storyId: stories[0].id
+          number: pageCount + 1,
+          storyId: currentState.story.id
         })
       });
       const body = await response.json();
@@ -68,6 +82,18 @@ const NewPage = () => {
     }
 
     savePrompt();
+    setCurrentState({
+      page: {
+        prompt: prompt,
+        completion: completion,
+        summary: summary,
+        image: image,
+        number: pageCount + 1,
+      },
+      story: currentState.story,
+      author: currentState.author,
+    });
+    resetFields();
   }
 
   useEffect(() => {
@@ -80,7 +106,7 @@ const NewPage = () => {
       body: JSON.stringify({ prompt: imagePrompt })
     }).then(response => response.json()).then(body => {
       console.log(body)
-      setImage(body.url)
+      setImage(body.b64_json)
     });
   }, [imagePrompt]);
 

@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { config } from '../config'
+import path from "path";
+import { writeFile } from "fs/promises";
 
 export async function listModels(): Promise<OpenAI.Models.Model[]> {
 
@@ -64,8 +66,25 @@ export async function generateImage(prompt: string): Promise<OpenAI.Images.Image
     model: "dall-e-3",
     style: "vivid",
     prompt: enrichedPrompt,
+    response_format: "b64_json",
     n: 1,
     size: "1024x1024"
   });
   return response.data[0];
+}
+
+export async function generateAudio(pageId: string, prompt: string) {
+  const speechFile = path.resolve(`./speech-${pageId}.mp3`);
+  const openai = new OpenAI({
+    organization: config.openAPIOrg,
+    apiKey: config.openAPIKey,
+  });
+  const mp3: any = await openai.audio.speech.create({
+    model: "tts-1",
+    voice: "nova",
+    input: prompt,
+  });
+  console.log(speechFile);
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  await writeFile(speechFile, buffer);
 }

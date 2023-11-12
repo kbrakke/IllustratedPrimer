@@ -1,18 +1,13 @@
-import React, { MouseEventHandler, useEffect, useState } from "react";
-import Prompt from "./components/Prompt";
-import Completion from "./components/Completion";
-import Image from "./components/Image";
-import Summary from "./components/Summary";
+import React, { useEffect, useState } from "react";
 import Next from "./components/Next";
 import Prev from "./components/Prev";
-import SaveButton from "./components/SaveButton";
 import DebugCurrentState from "./components/DebugCurrentState";
 import CompletedPage from "./components/CompletedPage";
 import NewPage from "./components/NewPage";
-import { set } from "lodash";
+import { isEmpty, isNil } from "lodash";
 
 
-interface Author {
+export interface Author {
   id: string;
   name: string;
   email: string;
@@ -30,8 +25,8 @@ export interface Page {
   story?: Story;
 }
 
-interface Story {
-  id: number;
+export interface Story {
+  id: string;
   title: string;
   authorId: string;
   author?: Author;
@@ -65,12 +60,11 @@ function App() {
       email: "",
     },
     story: {
-      id: 0,
+      id: "",
       title: "",
       authorId: "",
     }
   });
-  const [currentLeft, setCurrentLeft] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchInitialInfo() {
@@ -100,16 +94,26 @@ function App() {
         author: authorsJson[0],
         story: storiesJson[0],
       });
-      setCurrentLeft(pagesJson[0].number % 2 === 1);
       setHasNext(!!pagesJson[1]);
     }
     fetchInitialInfo();
   }, []);
 
   useEffect(() => {
-    setCurrentLeft(currentState.page.number % 2 === 1);
-    console.log(currentState.page.number)
-    setHasNext(!!pages[currentState.page.number]);
+    async function updatePages() {
+      const storyPages = await fetch(`http://localhost:3001/pages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ storyId: currentState.story.id })
+      });
+      const pagesJson = await storyPages.json();
+      setPages(pagesJson);
+    }
+    if (currentState.story.id === "" || currentState.story.id === undefined) return;
+    updatePages();
+    console.log(pages);
   }, [currentState]);
 
   const handleNext = async () => {
@@ -122,6 +126,7 @@ function App() {
       story: currentState.story,
     });
   }
+
   const handlePrev = async () => {
     console.log("prev");
     if (currentState.page.number === 1) return;
@@ -135,11 +140,16 @@ function App() {
 
   return (
     <div className="w-screen h-screen flex">
-      <div className="flex-1">
-        <Prev handlePrev={handlePrev} />
+      <Prev handlePrev={handlePrev} />
+      {import.meta.env.VITE_DEBUG && <div className="flex-1">
         <DebugCurrentState currentState={currentState} />
-      </div>
-      {!!pages[currentState.page.number] ? <><CompletedPage page={currentState.page} /><CompletedPage page={pages[currentState.page.number]} /></> : <><CompletedPage page={currentState.page} /><NewPage /></>}
+      </div>}
+      {isEmpty(pages)
+        ? <><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
+        : !isNil(pages[currentState?.page?.number])
+          ? <><CompletedPage page={currentState.page} /><CompletedPage page={pages[currentState.page.number]} /></>
+          : <><CompletedPage page={currentState.page} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
+      }
       <Next handleNext={handleNext} />
     </div>
   )
