@@ -8,8 +8,8 @@ export default {
     extend: {
       fontFamily: {
         storybook: ["Quintessential", "serif"]
-      },
-    },
+      }
+    }
   },
   plugins: [require('tailwindcss-animated')],
 }

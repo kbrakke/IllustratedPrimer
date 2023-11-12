@@ -138,17 +138,19 @@ function App() {
   }
 
   return (
-    <div className="w-screen h-screen flex">
+    <div className="w-screen screen flex h-screen">
       <SideBar />
-      <div className="ml-16"><PageButton handleClick={handlePrev} icon={<MdNavigateBefore size="32" />} left={true} /></div>
-      {debug && <div className="flex-1"><DebugCurrentState currentState={currentState} /></div>}
-      {isEmpty(pages)
-        ? <><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
-        : !isNil(pages[currentState?.page?.number])
-          ? <><CompletedPage page={currentState.page} initialDelay={0} /><CompletedPage page={pages[currentState.page.number]} initialDelay={8000} /></>
-          : <><CompletedPage page={currentState.page} initialDelay={0} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
-      }
-      <PageButton handleClick={handleNext} icon={<MdNavigateNext size="32" />} left={false} />
+      <div className="flex h-5/6 shadow-xl0">
+        <div className="ml-16"><PageButton handleClick={handlePrev} icon={<MdNavigateBefore size="32" />} left={true} /></div>
+        {debug && <div className="flex-1"><DebugCurrentState currentState={currentState} /></div>}
+        {isEmpty(pages)
+          ? <div className="w-full"><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></div>
+          : !isNil(pages[currentState?.page?.number])
+            ? <><CompletedPage page={currentState.page} initialDelay={0} /><CompletedPage page={pages[currentState.page.number]} initialDelay={8000} /></>
+            : <><CompletedPage page={currentState.page} initialDelay={0} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
+        }
+        <PageButton handleClick={handleNext} icon={<MdNavigateNext size="32" />} left={false} />
+      </div>
     </div>
   )
 }

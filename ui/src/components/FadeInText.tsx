@@ -1,10 +1,16 @@
+import { isNil } from "lodash";
+
 interface FadeInTextProps {
   text: string;
   initialDelay: number;
+  skipFade?: boolean;
 }
 
 const FadeInText = (props: FadeInTextProps) => {
-  const { text, initialDelay } = props
+  const { text, initialDelay, skipFade } = props
+  if (isNil(skipFade) || skipFade === true) {
+    return (<span className={`animate-fade font-storybook text-xl`}>{text}</span>)
+  }
   const words = text.split(' ');
   const timePerWord = 4000 / words.length;
   return (

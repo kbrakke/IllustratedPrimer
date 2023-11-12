@@ -2,6 +2,7 @@ import { Router } from 'express'
 import pino from 'pino-http';
 import bodyParser from 'body-parser';
 import { completePrompt, generateImage, listModels, summarizePrompt } from '../integrations/openai';
+import { getPagesByStoryId } from '../database/db';
 
 
 const router = Router();
@@ -29,26 +30,22 @@ router.get('/models', (req, res, next) => {
     }).catch(next)
 });
 
-router.post('/completion', (req, res, next) => {
+router.post('/completion', async (req, res, next) => {
   req.log.info(`Asking chat gpt using the following prompt ${JSON.stringify(req.body)}`);
-  const { prompt } = req.body;
+  const { prompt, storyId } = req.body;
   if (!prompt || prompt === "") {
     res.status(400).send({
       reason: 'Value "prompt" is missing from request body'
     });
     next()
   }
-  const enrichedPrompt = `
-  You are an adept storyteller and teacher for young children. 
-  A child has begun to tell you a story and you will be taking the role of the storyteller and teacher. 
-  You should be playful, silly, and fun.
-  You should always treat the prompt as fact even if it goes against natural laws, common sense, or past events.
-  You should respond in an open ended way that encourages the child to continue their story while at the same time being entertaining and educational.
-  The child's story is as follows: ${prompt}
-  Continue the above prompt then allow the child to continue their story.`;
-  completePrompt(enrichedPrompt).then(function (data) {
-    res.send({ text: data.message?.content?.trim() }).status(200).end()
-  }).catch(next)
+  const pages = await getPagesByStoryId(storyId)
+  const response = await completePrompt(prompt, pages)
+  try {
+    res.send({ text: response.message?.content?.trim() }).status(200).end()
+  } catch (e) {
+    next(e)
+  }
 });
 
 router.post('/summary', (req, res, next) => {

@@ -4,6 +4,7 @@ import Summary from './Summary'
 import SaveButton from './SaveButton'
 import Image from './Image'
 import FadeInText from './FadeInText'
+import { set } from 'lodash'
 
 
 interface NewPageProps {
@@ -20,6 +21,7 @@ const NewPage = (props: NewPageProps) => {
   const [summary, setSummary] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
   const [image, setImage] = useState("");
+  const [waitngForImage, setWaitingForImage] = useState(false);
   const handleChange = (event: any) => {
     setPrompt(event.target.value);
   }
@@ -98,32 +100,37 @@ const NewPage = (props: NewPageProps) => {
 
   useEffect(() => {
     if (imagePrompt === "") return;
-    fetch(`http://localhost:3001/ai/image`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt: imagePrompt })
-    }).then(response => response.json()).then(body => {
-      console.log(body)
-      setImage(body.b64_json)
-    });
+    setWaitingForImage(true);
+    const fetchImage = async () => {
+      const imageResponse = await fetch(`http://localhost:3001/ai/image`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ prompt: imagePrompt })
+      });
+      const imageJson = await imageResponse.json();
+      setImage(imageJson.b64_json);
+      setWaitingForImage(false);
+    };
+    fetchImage();
   }, [imagePrompt]);
 
   return (
-    <div className="flex-1 border-8 bg-orange-200 text-center">
-      <div className="flex-1 border-8 border-green-500 h-1/6">
+    <div className="flex-1 border-8 bg-orange-200 text-center h-full">
+      <div className="flex-1 m-4 h-1/3 box-border">
         <Prompt prompt={prompt} handleChange={handleChange} handleSubmit={handleSubmit} />
-      </div>
-      <div className="flex-1 border-8 border-green-500 h-1/6">
         <FadeInText text={completion} initialDelay={0} />
         <Summary summary={summary} />
         <SaveButton disabled={!prompt || !completion || !summary || !image} handleSave={handleSave} />
       </div>
-      <div className="flex-1 border-8 border-blue-500 h-1/2">
-        <h2>Image</h2>
-        <Image image={image} imagePrompt={imagePrompt} delay={0} />
-      </div>
+      {waitngForImage
+        ? <div className="flex m-4 h-1/2 box-border content-center shadow-md bg-orange-300 animate-fade animate-infinite animate-duration-[2000ms] animate-ease-in-out blur-xl">
+          <Image image={image} imagePrompt={imagePrompt} delay={0} />
+        </div>
+        : <div className="flex m-4 h-1/2 box-border content-center shadow-md">
+          <Image image={image} imagePrompt={imagePrompt} delay={0} />
+        </div>}
     </div>
   )
 }

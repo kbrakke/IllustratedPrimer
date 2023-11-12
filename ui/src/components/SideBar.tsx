@@ -5,7 +5,7 @@ import { RiFilePaper2Line } from 'react-icons/ri'
 
 const SideBar = () => {
   return (
-    <div className='fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-900 text-white shadow'>
+    <div className='fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-orange-300 text-white shadow-md'>
       <SideBarIcon icon={<BsFilePersonFill size="32" />} text="Author" />
       <SideBarIcon icon={<GiBookmarklet size="32" />} text="Stories" />
       <SideBarIcon icon={<RiFilePaper2Line size="32" />} text="Pages" />

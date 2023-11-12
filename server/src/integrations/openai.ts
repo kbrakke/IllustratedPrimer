@@ -1,7 +1,9 @@
 import OpenAI from "openai";
 import { config } from '../config'
-import path from "path";
+import path, { resolve } from "path";
 import { writeFile } from "fs/promises";
+import { Page } from "@prisma/client";
+import { Chat, ChatCompletionMessageParam } from "openai/resources";
 
 export async function listModels(): Promise<OpenAI.Models.Model[]> {
 
@@ -13,17 +15,37 @@ export async function listModels(): Promise<OpenAI.Models.Model[]> {
   return response.data;
 }
 
-export async function completePrompt(prompt: string): Promise<OpenAI.Chat.Completions.ChatCompletion.Choice> {
+function pageToMessage(page: Page): ChatCompletionMessageParam[] {
+  return [{
+    role: "user",
+    content: page.prompt
+  }, {
+    role: "assistant",
+    content: page.completion
+  }] as ChatCompletionMessageParam[];
+}
+
+export async function completePrompt(prompt: string, pages: Page[]): Promise<OpenAI.Chat.Completions.ChatCompletion.Choice> {
   const openai = new OpenAI({
     organization: config.openAPIOrg,
     apiKey: config.openAPIKey,
   });
+  const initialMessage = {
+    "role": "system",
+    "content": `You are an adept storyteller and teacher for young children. 
+    A child has begun to tell you a story and you will be taking the role of the storyteller and teacher. 
+    You should be playful, silly, and fun.
+    You should always treat the prompt as fact even if it goes against natural laws, common sense, or past events.
+    You should respond in an open ended way that encourages the child to continue their story while at the same time being entertaining and educational.`
+  } as ChatCompletionMessageParam;
+  const storyHistory = pages.map((page) => { return pageToMessage(page) }).flat();
+  const fullMessage = [initialMessage, ...storyHistory, {
+    role: "user",
+    content: prompt
+  } as ChatCompletionMessageParam];
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-1106",
-    messages: [{
-      role: "user",
-      content: prompt
-    }],
+    messages: fullMessage,
     max_tokens: 1000,
     temperature: 0,
   });
