@@ -14,7 +14,7 @@ const Image = (props: ImageProps) => {
     const animateStyle = {
       animationDelay: `${delay}ms`
     }
-    if (isNil(skipFade) || !skipFade) {
+    if (isNil(skipFade) || skipFade) {
       return (
         <img key={imagePrompt.substring(0, 16)} className="animate-fade-down object-scale-down object-center w-full h-full" src={b64Image} alt={imagePrompt} />
       )

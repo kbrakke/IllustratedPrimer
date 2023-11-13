@@ -8,7 +8,7 @@ interface FadeInTextProps {
 
 const FadeInText = (props: FadeInTextProps) => {
   const { text, initialDelay, skipFade } = props
-  if (isNil(skipFade) || skipFade === true) {
+  if (isNil(skipFade) || skipFade) {
     return (<span className={`animate-fade font-storybook text-xl`}>{text}</span>)
   }
   const words = text.split(' ');

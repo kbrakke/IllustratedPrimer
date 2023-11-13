@@ -160,23 +160,17 @@ function App() {
             ? <><CompletedPage
               page={currentState.page}
               initialDelay={0}
-              canPlayAudio={canPlayAudio}
-              setCanPlayAudio={setCanPlayAudio}
               playAudio={playAudio}
             />
               <CompletedPage
                 page={pages[currentState.page.number]}
                 initialDelay={8000}
-                canPlayAudio={canPlayAudio}
-                setCanPlayAudio={setCanPlayAudio}
-                playAudio={() => console.log("play audio")}
+                playAudio={playAudio}
               /></>
             : <><CompletedPage
               page={currentState.page}
               initialDelay={0}
-              canPlayAudio={canPlayAudio}
-              setCanPlayAudio={setCanPlayAudio}
-              playAudio={() => console.log("play audio")} />
+              playAudio={playAudio} />
               <NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} />
             </>
         }

@@ -35,4 +35,5 @@ model Page {
   summary String
   image String
   number Int
+  audioFile String?
 }

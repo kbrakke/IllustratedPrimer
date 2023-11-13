@@ -42,12 +42,28 @@ export function getPageById(id: string) {
 }
 
 export async function createPageForStoryId(storyId: string, page: Prisma.PageCreateInput) {
-  return prisma.story.update({
+  await prisma.story.update({
     where: { id: storyId },
     data: {
       pages: {
         create: page
       }
     }
+  });
+  return prisma.page.findFirst({ where: { storyId }, orderBy: { number: 'desc' } });
+}
+
+export async function setAudioForPage(pageId: string, audioFile: string) {
+  return prisma.page.update({
+    where: { id: pageId },
+    data: {
+      audioFile
+    }
+  })
+}
+
+export async function getAudioFileForPage(pageId: string) {
+  return prisma.page.findUnique({ where: { id: pageId } }).then((page) => {
+    return page?.audioFile
   });
 }

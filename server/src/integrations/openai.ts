@@ -4,6 +4,7 @@ import path, { resolve } from "path";
 import { writeFile } from "fs/promises";
 import { Page } from "@prisma/client";
 import { Chat, ChatCompletionMessageParam } from "openai/resources";
+import { fstat } from "fs";
 
 export async function listModels(): Promise<OpenAI.Models.Model[]> {
 
@@ -98,7 +99,7 @@ export async function generateImage(prompt: string): Promise<OpenAI.Images.Image
 }
 
 export async function generateAudio(pageId: string, prompt: string) {
-  const speechFile = path.resolve(`./speech-${pageId}.mp3`);
+  const speechFile = `${__dirname}/speech/speech-${pageId}.mp3`;
   const openai = new OpenAI({
     organization: config.openAPIOrg,
     apiKey: config.openAPIKey,
@@ -111,5 +112,11 @@ export async function generateAudio(pageId: string, prompt: string) {
   });
   console.log(speechFile);
   const buffer = Buffer.from(await mp3.arrayBuffer());
-  return buffer;
+  try {
+    await writeFile(speechFile, buffer);
+    return buffer;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 }

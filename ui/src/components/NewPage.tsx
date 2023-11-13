@@ -4,30 +4,54 @@ import Summary from './Summary'
 import SaveButton from './SaveButton'
 import Image from './Image'
 import FadeInText from './FadeInText'
-import { set } from 'lodash'
+import * as _ from 'lodash'
+import { CurrentState } from '../App'
 
 
 interface NewPageProps {
   pageCount: number;
-  currentState: any;
-  setCurrentState: any;
+  currentState: CurrentState;
+  setCurrentState: React.Dispatch<React.SetStateAction<CurrentState>>;
 }
 
 const NewPage = (props: NewPageProps) => {
   const { pageCount, currentState, setCurrentState } = props;
+  const [newPageId, setNewPageId] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [completion, setCompletion] = useState("Waiting for Response");
+  const [completion, setCompletion] = useState("");
   const [, setWaitingForSummary] = useState(false);
   const [summary, setSummary] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
   const [image, setImage] = useState("");
   const [waitngForImage, setWaitingForImage] = useState(false);
+
   const handleChange = (event: any) => {
     setPrompt(event.target.value);
   }
 
-  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async (event) => {
-    event.preventDefault();
+  const resetFields = () => {
+    setCurrentState({
+      page: {
+        id: newPageId,
+        storyId: currentState.story.id,
+        prompt: "prompt",
+        completion: "completion",
+        summary: "summary",
+        image: "image",
+        number: pageCount + 1,
+      },
+      story: currentState.story,
+      author: currentState.author
+    })
+    setNewPageId("");
+    setPrompt("");
+    setCompletion("");
+    setSummary("");
+    setImage("");
+  }
+
+
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = async () => {
     const response = await fetch(`http://localhost:3001/ai/completion`, {
       method: "POST",
       headers: {
@@ -37,30 +61,26 @@ const NewPage = (props: NewPageProps) => {
     });
     const body = await response.json();
     setCompletion(body.text);
-    await handleSummary();
   }
 
-  const handleSummary = async () => {
+  useEffect(() => {
     setWaitingForSummary(true);
-    const response = await fetch(`http://localhost:3001/ai/summary`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt, completion })
-    });
-    const body = await response.json();
-    setSummary(body.summary);
-    setImagePrompt(body.imagePrompt);
+    if (completion === "") return;
+    const fetchSummary = async () => {
+      const response = await fetch(`http://localhost:3001/ai/summary`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ prompt, completion })
+      });
+      const body = await response.json();
+      setSummary(body.summary);
+      setImagePrompt(body.imagePrompt);
+    }
+    fetchSummary();
     setWaitingForSummary(false);
-  }
-
-  const resetFields = () => {
-    setPrompt("");
-    setCompletion("");
-    setSummary("");
-    setImage("");
-  }
+  }, [completion]);
 
   const handleSave = async () => {
     console.log("saving");
@@ -80,21 +100,10 @@ const NewPage = (props: NewPageProps) => {
         })
       });
       const body = await response.json();
+      setNewPageId(body.id);
       console.log(body);
     }
-
     savePrompt();
-    setCurrentState({
-      page: {
-        prompt: prompt,
-        completion: completion,
-        summary: summary,
-        image: image,
-        number: pageCount + 1,
-      },
-      story: currentState.story,
-      author: currentState.author,
-    });
     resetFields();
   }
 
