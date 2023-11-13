@@ -99,6 +99,44 @@ const NewPage = (props: NewPageProps) => {
   }
 
   useEffect(() => {
+    if (image === "") return;
+    console.log("saving");
+    async function savePrompt() {
+      const response = await fetch(`http://localhost:3001/pages/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          completion: completion,
+          summary: summary,
+          image: image,
+          number: pageCount + 1,
+          storyId: currentState.story.id
+        })
+      });
+      const body = await response.json();
+      console.log(body);
+    }
+
+    savePrompt();
+    setCurrentState({
+      page: {
+        prompt: prompt,
+        completion: completion,
+        summary: summary,
+        image: image,
+        number: pageCount + 1,
+      },
+      story: currentState.story,
+      author: currentState.author,
+    });
+    resetFields();
+
+  }, [image]);
+
+  useEffect(() => {
     if (imagePrompt === "") return;
     setWaitingForImage(true);
     const fetchImage = async () => {

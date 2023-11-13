@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import Next from "./components/Next";
-import Prev from "./components/Prev";
+import { useEffect, useRef, useState } from "react";
 import DebugCurrentState from "./components/DebugCurrentState";
 import CompletedPage from "./components/CompletedPage";
 import NewPage from "./components/NewPage";
@@ -8,6 +6,7 @@ import SideBar from "./components/SideBar";
 import PageButton from "./components/PageButton";
 import { isEmpty, isNil } from "lodash";
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
+import { find } from 'lodash';
 
 const debug: boolean = import.meta.env.VITE_DEBUG === "true";
 
@@ -47,6 +46,8 @@ function App() {
   const [, setAuthorsList] = useState<Author[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [, setStories] = useState<Story[]>([]);
+  const [canPlayAudio, setCanPlayAudio] = useState<boolean>(true);
+  const audioRef = useRef(new Audio());
   const [currentState, setCurrentState] = useState<CurrentState>({
     page: {
       id: "",
@@ -101,22 +102,6 @@ function App() {
     fetchInitialInfo();
   }, []);
 
-  useEffect(() => {
-    async function updatePages() {
-      const storyPages = await fetch(`http://localhost:3001/pages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ storyId: currentState.story.id })
-      });
-      const pagesJson = await storyPages.json();
-      setPages(pagesJson);
-    }
-    if (currentState.story.id === "" || currentState.story.id === undefined) return;
-    updatePages();
-  }, [currentState]);
-
   const handleNext = async () => {
     if (currentState.page.number === pages.length) return;
     const nextPage = pages[currentState.page.number];
@@ -137,6 +122,32 @@ function App() {
     });
   }
 
+  const playAudio = (e: React.MouseEvent<HTMLElement>) => {
+    console.log("play audio");
+    console.log(canPlayAudio);
+    if (!canPlayAudio) return;
+    const pageId: string = e.currentTarget.id.substring(0, e.currentTarget.id.length - 6);
+    console.log(pageId);
+    const pageForAudio = find(pages, (page) => page.id === pageId);
+    console.log(pageForAudio);
+    const startAudioStream = async () => {
+      const response = await fetch(`http://localhost:3001/ai/tts/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ pageId: pageForAudio?.id, prompt: `${pageForAudio?.prompt} ${pageForAudio?.completion}` })
+      });
+      const blob = await response.blob();
+      var url = window.URL.createObjectURL(blob)
+      audioRef.current.src = url;
+      audioRef.current.play();
+    }
+    setCanPlayAudio(false);
+    startAudioStream();
+    setCanPlayAudio(true);
+  }
+
   return (
     <div className="w-screen screen flex h-screen">
       <SideBar />
@@ -146,8 +157,28 @@ function App() {
         {isEmpty(pages)
           ? <div className="w-full"><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></div>
           : !isNil(pages[currentState?.page?.number])
-            ? <><CompletedPage page={currentState.page} initialDelay={0} /><CompletedPage page={pages[currentState.page.number]} initialDelay={8000} /></>
-            : <><CompletedPage page={currentState.page} initialDelay={0} /><NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} /></>
+            ? <><CompletedPage
+              page={currentState.page}
+              initialDelay={0}
+              canPlayAudio={canPlayAudio}
+              setCanPlayAudio={setCanPlayAudio}
+              playAudio={playAudio}
+            />
+              <CompletedPage
+                page={pages[currentState.page.number]}
+                initialDelay={8000}
+                canPlayAudio={canPlayAudio}
+                setCanPlayAudio={setCanPlayAudio}
+                playAudio={() => console.log("play audio")}
+              /></>
+            : <><CompletedPage
+              page={currentState.page}
+              initialDelay={0}
+              canPlayAudio={canPlayAudio}
+              setCanPlayAudio={setCanPlayAudio}
+              playAudio={() => console.log("play audio")} />
+              <NewPage pageCount={pages.length} currentState={currentState} setCurrentState={setCurrentState} />
+            </>
         }
         <PageButton handleClick={handleNext} icon={<MdNavigateNext size="32" />} left={false} />
       </div>

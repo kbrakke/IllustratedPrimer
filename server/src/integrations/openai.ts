@@ -33,7 +33,8 @@ export async function completePrompt(prompt: string, pages: Page[]): Promise<Ope
   const initialMessage = {
     "role": "system",
     "content": `You are an adept storyteller and teacher for young children. 
-    A child has begun to tell you a story and you will be taking the role of the storyteller and teacher. 
+    A child has begun to tell you a story and you will be taking the role of the storyteller and teacher.
+    If there is a misspelling in the input, make your best guess as to what it should be and continue from there.
     You should be playful, silly, and fun.
     You should always treat the prompt as fact even if it goes against natural laws, common sense, or past events.
     You should respond in an open ended way that encourages the child to continue their story while at the same time being entertaining and educational.`
@@ -44,9 +45,9 @@ export async function completePrompt(prompt: string, pages: Page[]): Promise<Ope
     content: prompt
   } as ChatCompletionMessageParam];
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo-1106",
+    model: "gpt-4-1106-preview",
     messages: fullMessage,
-    max_tokens: 1000,
+    max_tokens: 700,
     temperature: 0,
   });
   return response.choices[0];
@@ -67,11 +68,12 @@ export async function summarizePrompt(prompt: string, completion: string): Promi
     apiKey: config.openAPIKey,
   });
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo-1106",
+    model: "gpt-4-1106-preview",
     messages: [{
       role: "user",
       content: concat
     }],
+    response_format: { type: "json_object" },
     max_tokens: 333,
     temperature: 0,
   });
@@ -79,7 +81,7 @@ export async function summarizePrompt(prompt: string, completion: string): Promi
 }
 
 export async function generateImage(prompt: string): Promise<OpenAI.Images.Image> {
-  const enrichedPrompt = `${prompt} in the style of a children's book illustration.`
+  const enrichedPrompt = `I NEED to test how the tool works with extremely simple prompts. DO NOT add any detail, just use it AS-IS:${prompt} in the style of a children's book illustration.`
   const openai = new OpenAI({
     organization: config.openAPIOrg,
     apiKey: config.openAPIKey,
@@ -104,9 +106,10 @@ export async function generateAudio(pageId: string, prompt: string) {
   const mp3: any = await openai.audio.speech.create({
     model: "tts-1",
     voice: "nova",
+    response_format: "mp3",
     input: prompt,
   });
   console.log(speechFile);
   const buffer = Buffer.from(await mp3.arrayBuffer());
-  await writeFile(speechFile, buffer);
+  return buffer;
 }

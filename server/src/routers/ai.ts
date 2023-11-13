@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import pino from 'pino-http';
 import bodyParser from 'body-parser';
-import { completePrompt, generateImage, listModels, summarizePrompt } from '../integrations/openai';
+import { completePrompt, generateAudio, generateImage, listModels, summarizePrompt } from '../integrations/openai';
 import { getPagesByStoryId } from '../database/db';
 
 
@@ -83,5 +83,17 @@ router.post('/image', (req, res, next) => {
   }).catch(next);
 });
 
+router.post('/tts', (req, res, next) => {
+  const { pageId, prompt } = req.body;
+  req.log.info(`Asking openai to make an audio file for the following prompt ${req.body.prompt}`);
+  if (!pageId || !prompt) {
+    res.status(400).send({
+      reason: 'Value "pageId" or "prompt" is missing from request body'
+    });
+  }
+  generateAudio(pageId, prompt).then(function (data) {
+    res.header("Content-Type", "audio/mpeg").send(data).status(200).end()
+  }).catch(next);
+});
 
 export { router as ai };
