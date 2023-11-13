@@ -169,7 +169,6 @@ const NewPage = (props: NewPageProps) => {
         <Prompt prompt={prompt} handleChange={handleChange} handleSubmit={handleSubmit} />
         <FadeInText text={completion} initialDelay={0} />
         <Summary summary={summary} />
-        <SaveButton disabled={!prompt || !completion || !summary || !image} handleSave={handleSave} />
       </div>
       {waitngForImage
         ? <div className="flex m-4 h-1/2 box-border content-center shadow-md bg-orange-300 animate-fade animate-infinite animate-duration-[2000ms] animate-ease-in-out blur-xl">
