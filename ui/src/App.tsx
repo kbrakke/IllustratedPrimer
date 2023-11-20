@@ -151,7 +151,7 @@ function App() {
   return (
     <div className="w-screen screen flex h-screen">
       <SideBar />
-      <div className="flex h-5/6 shadow-xl0">
+      <div className="flex shadow-xl">
         <div className="ml-16"><PageButton handleClick={handlePrev} icon={<MdNavigateBefore size="32" />} left={true} /></div>
         {debug && <div className="flex-1"><DebugCurrentState currentState={currentState} /></div>}
         {isEmpty(pages)

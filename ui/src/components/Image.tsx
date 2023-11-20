@@ -16,11 +16,15 @@ const Image = (props: ImageProps) => {
     }
     if (isNil(skipFade) || skipFade) {
       return (
-        <img key={imagePrompt.substring(0, 16)} className="animate-fade-down object-scale-down object-center w-full h-full" src={b64Image} alt={imagePrompt} />
+        <span className="inline-flex h-1/2 m-4">
+          <img key={imagePrompt.substring(0, 16)} className="animate-fade-down object-scale-down object-center shrink border-8 border-double" src={b64Image} alt={imagePrompt} />
+        </span>
       )
     }
     return (
-      <img key={imagePrompt.substring(0, 16)} style={animateStyle} className="animate-fade-down object-scale-down object-center w-full h-full" src={b64Image} alt={imagePrompt} />
+      <span className="inline-flex h-1/2 m-4">
+        <img key={imagePrompt.substring(0, 16)} style={animateStyle} className="animate-fade-down object-scale-down object-center shrink border-4 border-double" src={b64Image} alt={imagePrompt} />
+      </span>
     )
   } else return null;
 }

@@ -9,8 +9,9 @@ To run the primer locally you will need to run both the UI and the server. As we
 3. Navigate to the server directory `cd server`
 4. Create a copy of the `.env.example` file named `.env`. `cp .env.example .env`
 5. Fill in the missing information for OpenAI organization and OpenAI key
-6. Current the primer requires the db to be seeded to start. Do that with `npx prisma db seed`
-6. Run the sever with `pnpm run dev`
-7. In a different terminal window naviate to the `ui` folder.
-8. Run the ui with `pnpm run dev`
-9. Navigate to the browser to begin using the primer. 
+6. Generate the Prisma db client `npx prisma generate`
+7. Current the primer requires the db to be seeded to start. Do that with `npx prisma db seed`
+8. Run the sever with `pnpm run dev`
+9. In a different terminal window naviate to the `ui` folder.
+10. Run the ui with `pnpm run dev`
+11. Navigate to the browser to begin using the primer. 

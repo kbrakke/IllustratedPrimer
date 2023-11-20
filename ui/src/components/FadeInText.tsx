@@ -14,7 +14,7 @@ const FadeInText = (props: FadeInTextProps) => {
   const words = text.split(' ');
   const timePerWord = 4000 / words.length;
   return (
-    <div className="inline-block">
+    <div className="inline-block h-1/2">
       {words.map((word, index) => {
         const animateStyle = {
           animationDelay: `${(index * timePerWord) + initialDelay || 0}ms`
