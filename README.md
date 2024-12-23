@@ -1,17 +1,18 @@
-# The Young Lady's Illustrated Primer
+# Illustrated Primer
 
-This is a prototype for an interactive storybook powered by generative AI. The user can make stories by writing anything in to the prompt window. AI will return a completion, then generate an image for this page of the book. A generated narration can accompany the story as well.
+This project is a Next.js application that includes a chat interface powered by Langchain and OpenAI.
 
-## Running the Illustrated Primer
-To run the primer locally you will need to run both the UI and the server. As well as provide your own openai API keys.
-1. To run the primer you must have node 18 installed locally.
-2. From the root of the project run `pnpm install` to install all dependencies.
-3. Navigate to the server directory `cd server`
-4. Create a copy of the `.env.example` file named `.env`. `cp .env.example .env`
-5. Fill in the missing information for OpenAI organization and OpenAI key
-6. Generate the Prisma db client `npx prisma generate`
-7. Current the primer requires the db to be seeded to start. Do that with `npx prisma db seed`
-8. Run the sever with `pnpm run dev`
-9. In a different terminal window naviate to the `ui` folder.
-10. Run the ui with `pnpm run dev`
-11. Navigate to the browser to begin using the primer. 
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+```
+
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
