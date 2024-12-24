@@ -9,12 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        earth: {
-          lightest: '#cab891', // sand color
-          light: '#70683b',    // olive
-          medium: '#5f6a54',   // sage
-          dark: '#2b2c1e',     // dark olive
-          accent: '#81231e',   // rust red
+        primer: {
+          lightest: '#cab891',  // Neutral beige
+          light: '#70683b',     // Darker beige
+          primary: '#81231e',   // Deep red
+          dark: '#5f6a54',      // Sage green
+          darkest: '#2b2c1e',   // Dark olive
         },
       },
     },
