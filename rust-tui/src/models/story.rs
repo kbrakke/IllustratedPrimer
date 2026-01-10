@@ -31,10 +31,12 @@ impl Story {
         }
     }
 
+    #[allow(dead_code)]
     pub fn created_at_datetime(&self) -> DateTime<Utc> {
         DateTime::from_timestamp(self.created_at, 0).unwrap_or_default()
     }
 
+    #[allow(dead_code)]
     pub fn updated_at_datetime(&self) -> DateTime<Utc> {
         DateTime::from_timestamp(self.updated_at, 0).unwrap_or_default()
     }

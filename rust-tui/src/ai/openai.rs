@@ -80,6 +80,7 @@ impl OpenAIClient {
         Ok(content)
     }
 
+    #[allow(dead_code)]
     pub async fn generate_story_response_stream(
         &self,
         user_message: String,

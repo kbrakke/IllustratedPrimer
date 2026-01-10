@@ -12,6 +12,7 @@ impl PromptTemplate {
         )
     }
 
+    #[allow(dead_code)]
     pub fn initial_story_prompt(topic: &str) -> String {
         format!(
             "Let's start a new educational story about {}. \
@@ -20,6 +21,7 @@ impl PromptTemplate {
         )
     }
 
+    #[allow(dead_code)]
     pub fn continuation_prompt(previous_context: &str, user_input: &str) -> String {
         format!(
             "Previous story context: {}\n\nChild's response: {}\n\nContinue the story based on their input.",
