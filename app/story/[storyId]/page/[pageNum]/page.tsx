@@ -34,16 +34,15 @@ export default async function StoryPageDetail({
           ← Back to Story
         </Link>
       </div>
-
       <div className="grid gap-8">
-        <div className="aspect-w-16 aspect-h-9 relative h-[400px]">
+        {currentPage.image && (<div className="aspect-w-16 aspect-h-9 relative h-[400px]">
           <Image
             src={currentPage.image}
             alt={`Illustration for page ${pageNum}`}
             fill
             className="object-cover rounded-lg"
           />
-        </div>
+        </div>)}
 
         <div className="prose max-w-none">
           <h1 className="text-3xl font-bold mb-4">
@@ -51,7 +50,7 @@ export default async function StoryPageDetail({
           </h1>
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Summary</h2>
-            <p>{currentPage.summary}</p>
+            <p>{currentPage.prompt}</p>
           </div>
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Story</h2>

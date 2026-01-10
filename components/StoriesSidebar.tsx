@@ -7,11 +7,7 @@ interface Story {
   createdAt: Date;
 }
 
-interface StoriesSidebarProps {
-  isOpen: boolean;
-}
-
-export default function StoriesSidebar({ isOpen }: StoriesSidebarProps) {
+export default function StoriesSidebar({ }) {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -2,7 +2,8 @@ import { auth } from "@/auth"
 import SignIn from '@/components/SignIn'
 import Image from 'next/image'
 
-const SessionInfo = async () => {
+// Server Component to fetch session
+async function SessionInfo() {
   const session = await auth()
 
   if (!session) {
@@ -24,7 +25,15 @@ const SessionInfo = async () => {
           className="rounded-full"
         />
       )}
-      <span className="text-sm">{session.user?.name}</span>
+      <div
+        className="text-sm group relative"
+        title={`User ID: ${session.user?.id || 'Not available'}`}
+      >
+        <span>{session.user?.name}</span>
+        <div className="absolute hidden group-hover:block bg-primer-lightest border border-primer-dark p-2 rounded-lg shadow-lg -bottom-12 left-0 whitespace-nowrap">
+          ID: {session.user?.id || 'Not available'}
+        </div>
+      </div>
     </div>
   )
 }

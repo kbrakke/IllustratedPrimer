@@ -10,11 +10,11 @@ const config: Config = {
     extend: {
       colors: {
         primer: {
-          lightest: '#cab891',  // Neutral beige
-          light: '#70683b',     // Darker beige
-          primary: '#81231e',   // Deep red
-          dark: '#5f6a54',      // Sage green
-          darkest: '#2b2c1e',   // Dark olive
+          lightest: '#FFFFFF',  // Pure White
+          light: '#F5F5F5',     // Off-White
+          primary: '#000000',   // Pure Black
+          dark: '#E0E0E0',      // Light Gray
+          darkest: '#C0C0C0',   // Medium Gray
         },
       },
     },
