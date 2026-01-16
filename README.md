@@ -2,54 +2,68 @@
 
 > An AI-powered interactive learning platform for children, inspired by "The Diamond Age" by Neal Stephenson.
 
-A lightweight, educational storytelling application that adapts to children's learning pace. Built in Rust for embedded systems and e-ink displays.
+A lightweight, educational storytelling application that adapts to children's learning pace. Built in Go with BubbleTea for a beautiful terminal interface.
 
 ## Overview
 
 The Illustrated Primer provides an interactive learning experience where children engage with AI-powered stories that teach relevant, age-appropriate subjects including science, math, history, and critical thinking skills. The AI follows the child's lead, weaving educational content naturally into the narrative.
 
 **Target Audience**: Children ages 2-8
-**Target Hardware**: Embedded systems (Raspberry Pi), e-ink displays, terminals
+**AI Model**: GPT-5 (with gpt-5-nano for testing)
+**Database**: PostgreSQL
 **Current Status**: Production-ready terminal UI
 
 ## Features
 
-- **Interactive AI Storytelling**: GPT-4-powered narratives that adapt to each child
+- **Interactive AI Storytelling**: GPT-5-powered narratives that adapt to each child
 - **Educational Focus**: Seamlessly incorporates learning into engaging stories
 - **Multi-User Support**: Individual story libraries for each child
 - **Persistent History**: All conversations saved and browsable
-- **E-Ink Optimized**: Pure black/white design for e-reader displays
-- **Lightweight**: 3.6 MB binary, 25 MB memory footprint
-- **Embedded-Ready**: Runs on Raspberry Pi Zero 2 W and similar devices
+- **Beautiful TUI**: Built with BubbleTea and Lipgloss for a polished terminal experience
+- **Streaming Responses**: Real-time AI response streaming with visual feedback
+- **Comprehensive Testing**: Unit, integration, and API tests included
 
 ## Quick Start
 
 ### Prerequisites
 
-- Rust 1.70+ ([install](https://rustup.rs/))
-- SQLite 3.37+
+- Go 1.22+ ([install](https://go.dev/dl/))
+- PostgreSQL 14+ ([install](https://www.postgresql.org/download/))
+- Docker (for running integration tests)
 - OpenAI API key ([get one](https://platform.openai.com/api-keys))
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/IllustratedPrimer.git
-cd IllustratedPrimer
+git clone https://github.com/kbrakke/illustrated-primer.git
+cd illustrated-primer
+
+# Install dependencies
+go mod download
 
 # Configure environment
 cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
+# Edit .env and add your OPENAI_API_KEY and DATABASE_URL
 
-# Build and run
-cargo run --release
+# Create PostgreSQL database
+createdb primer
+
+# Build the application
+make build
+
+# Run with seed data (first time)
+./bin/primer --seed
+
+# Or run normally
+./bin/primer
 ```
 
 ### First Story
 
-1. **Select a user** (or let it create a default user)
-2. **Press `n`** to create a new story
-3. **Type a title**: "Space Adventure"
+1. **Select a user** (seed data includes "Princess Nellodee")
+2. **Select a story** or press `n` to create a new one
+3. **View existing pages** or press Enter to start chatting
 4. **Start chatting**: "Tell me about planets"
 5. **Continue the conversation**: The AI will guide educational discussions
 
@@ -57,94 +71,53 @@ cargo run --release
 
 | Key | Action |
 |-----|--------|
-| `↑` / `↓` | Navigate lists |
+| `↑` / `↓` or `k` / `j` | Navigate lists |
 | `Enter` | Select / Submit |
 | `Esc` | Go back |
-| `Ctrl+Q` | Quit |
+| `Ctrl+C` or `q` | Quit |
 | `n` | New story (in Story List) |
-
-## Performance
-
-Compared to the original Next.js prototype:
-
-| Metric | Rust TUI | Next.js | Improvement |
-|--------|----------|---------|-------------|
-| Binary Size | 3.6 MB | 547 MB | **152x smaller** |
-| Memory Usage | 25 MB | 200 MB | **8x less** |
-| Startup Time | 0.11s | 4.5s | **41x faster** |
-| Battery Life | 24-48h | 8-12h | **2-4x longer** |
-
-See [PERFORMANCE.md](docs/PERFORMANCE.md) for detailed benchmarks.
 
 ## Architecture
 
 ```
-IllustratedPrimer/
-├── src/
-│   ├── main.rs           # Application entry point
-│   ├── models/           # Data models (User, Story, Page)
-│   ├── db/               # SQLite database layer
-│   ├── ai/               # OpenAI integration
-│   └── tui/              # Terminal UI (Ratatui)
-├── migrations/           # Database schema
-├── docs/                 # Comprehensive documentation
-│   ├── ARCHITECTURE.md   # Technical deep-dive
-│   ├── GETTING_STARTED.md# Step-by-step guide
-│   ├── PERFORMANCE.md    # Benchmarks
-│   └── archive/          # Historical docs
-├── Cargo.toml            # Rust dependencies
-└── README.md             # This file
+illustrated-primer/
+├── cmd/
+│   └── primer/
+│       └── main.go           # Application entry point
+├── internal/
+│   ├── ai/                   # OpenAI GPT-5 client
+│   │   ├── client.go         # API client with streaming
+│   │   └── prompt.go         # System prompt template
+│   ├── db/                   # PostgreSQL database layer
+│   │   ├── database.go       # Connection and migrations
+│   │   ├── user.go           # User CRUD operations
+│   │   ├── story.go          # Story CRUD operations
+│   │   └── page.go           # Page CRUD operations
+│   ├── models/               # Data models
+│   │   ├── user.go
+│   │   ├── story.go
+│   │   └── page.go
+│   ├── tui/                  # Terminal UI (BubbleTea)
+│   │   ├── app.go            # Main application model
+│   │   ├── views.go          # View rendering (Lipgloss)
+│   │   └── keys.go           # Key bindings
+│   └── seed/                 # Seed data loader
+├── testutil/                 # Test utilities
+│   ├── database.go           # Testcontainers PostgreSQL
+│   └── mock_ai.go            # Mock AI client
+├── migrations/               # Database migrations
+├── seed/                     # Seed data (JSON)
+├── go.mod
+├── Makefile
+└── README.md
 ```
 
 **Tech Stack**:
-- **Language**: Rust 2021
-- **UI**: Ratatui + Crossterm (terminal interface)
-- **Database**: SQLite (optimized schema, WAL mode)
-- **AI**: OpenAI GPT-4-turbo via async-openai
-- **Async Runtime**: Tokio
-- **Binary Size**: 3.6 MB (optimized with LTO, stripped)
-
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed system design.
-
-## Documentation
-
-- **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** - Installation, first run, troubleshooting
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design, database schema, performance
-- **[PERFORMANCE.md](docs/PERFORMANCE.md)** - Detailed benchmarks vs Next.js
-- **[RUST_README.md](docs/RUST_README.md)** - Original Rust TUI documentation
-
-### Archive
-
-Historical documentation from the Next.js prototype:
-- **[E_INK_DESIGN_NOTES.md](docs/archive/E_INK_DESIGN_NOTES.md)** - E-ink display guidelines
-- **[NEXTJS_SCHEMA.md](docs/archive/NEXTJS_SCHEMA.md)** - Original Prisma schema
-- **[TEST_STORY_PROMPTS.md](docs/archive/TEST_STORY_PROMPTS.md)** - Sample test prompts
-
-## Deployment
-
-### Desktop/Server
-
-```bash
-cargo build --release
-./target/release/illustrated_primer_tui
-```
-
-### Raspberry Pi (Cross-Compile)
-
-```bash
-# Install cross-compilation target
-rustup target add aarch64-unknown-linux-gnu
-
-# Build for ARM64
-cargo build --release --target aarch64-unknown-linux-gnu
-
-# Copy to Pi
-scp target/aarch64-unknown-linux-gnu/release/illustrated_primer_tui pi@raspberrypi:~/
-```
-
-### Embedded Linux / E-Ink Device
-
-See [ARCHITECTURE.md - Phase 3](docs/ARCHITECTURE.md#phase-3-embedded-deployment) for e-ink driver integration.
+- **Language**: Go 1.22
+- **UI**: BubbleTea + Bubbles + Lipgloss
+- **Database**: PostgreSQL with pgx driver
+- **AI**: OpenAI GPT-5 Responses API
+- **Testing**: Go testing + testcontainers
 
 ## Configuration
 
@@ -153,26 +126,41 @@ See [ARCHITECTURE.md - Phase 3](docs/ARCHITECTURE.md#phase-3-embedded-deployment
 Create a `.env` file (copy from `.env.example`):
 
 ```env
+# Required
 OPENAI_API_KEY=sk-your-key-here
-DATABASE_URL=sqlite:./data.db
-RUST_LOG=info
+DATABASE_URL=postgres://user:pass@localhost:5432/primer?sslmode=disable
+
+# Optional
+OPENAI_ORG_ID=org-your-org-id
+OPENAI_MODEL=gpt-5-mini
+OPENAI_MAX_TOKENS=4096
 ```
 
-### Database
+### AI Model Options
 
-- **Default location**: `./data.db`
-- **Schema**: Auto-migrates on first run
-- **Backup**: Copy `data.db` file
-- **Reset**: Delete `data.db` to start fresh
+| Model | Use Case |
+|-------|----------|
+| `gpt-5` | Production (default) |
+| `gpt-5-mini` | Faster, cheaper |
+| `gpt-5-nano` | Testing (very cheap) |
 
-### AI Model
+## Testing
 
-To change the OpenAI model, edit `src/ai/openai.rs`:
+```bash
+# Run unit tests only (fast, no external dependencies)
+make test-unit
 
-```rust
-model: "gpt-4-turbo".to_string()  // Current
-// or
-model: "gpt-3.5-turbo".to_string() // Faster, cheaper
+# Run integration tests (requires Docker for testcontainers)
+make test-integration
+
+# Run AI tests (requires OPENAI_API_KEY, uses gpt-5-nano)
+make test-ai
+
+# Run all tests
+make test-all
+
+# Generate coverage report
+make coverage
 ```
 
 ## Development
@@ -180,93 +168,42 @@ model: "gpt-3.5-turbo".to_string() // Faster, cheaper
 ### Building
 
 ```bash
-cargo build          # Debug build
-cargo build --release # Optimized build
+make build          # Build binary to bin/primer
+make run            # Run without building
+make run-seed       # Run with seed data
+make run-debug      # Run with debug logging
 ```
 
-### Testing
+### Code Quality
 
 ```bash
-cargo test           # Run tests
-cargo clippy         # Linting
-cargo fmt            # Format code
+make fmt            # Format code
+make lint           # Run linter (requires golangci-lint)
 ```
 
-### Debugging
+### Makefile Targets
 
 ```bash
-RUST_LOG=debug cargo run
-RUST_BACKTRACE=1 cargo run
+make help           # Show all available targets
 ```
 
-## Roadmap
+## Documentation
 
-### ✅ Phase 1: Terminal UI (Current)
-- [x] Core business logic
-- [x] SQLite database layer
-- [x] OpenAI integration
-- [x] Terminal interface
-- [x] Multi-user support
+Each package has a `CLAUDE.md` file documenting its purpose and architecture:
 
-### 🚧 Phase 2: API Server (Planned)
-- [ ] Axum web server
-- [ ] REST API endpoints
-- [ ] WebSocket streaming
-- [ ] Web UI compatibility
-
-### 🎯 Phase 3: Embedded Deployment (Future)
-- [ ] ARM cross-compilation
-- [ ] E-ink display driver integration
-- [ ] Battery optimization
-- [ ] Systemd service
-- [ ] Hardware button support
-
-## Contributing
-
-Contributions welcome! Please:
-
-1. Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) to understand the system
-2. Follow Rust best practices (rustfmt, clippy)
-3. Write clean, self-documenting code
-4. Add documentation for new features
-5. Test on multiple platforms
-
-### Code Style
-
-- Prefer self-documenting code over comments
-- Keep functions small and focused
-- Use `Result<T>` for error handling
-- Follow [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
-
-## License
-
-See LICENSE file for details.
-
-## Acknowledgments
-
-- **Inspiration**: "The Diamond Age" by Neal Stephenson
-- **AI**: Powered by OpenAI GPT-4
-- **UI Framework**: Ratatui
-- **Database**: SQLite
-- **Async Runtime**: Tokio
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/IllustratedPrimer/issues)
-- **Documentation**: See `docs/` directory
-- **Questions**: Check [GETTING_STARTED.md](docs/GETTING_STARTED.md)
+- `internal/ai/CLAUDE.md` - AI client documentation
+- `internal/db/CLAUDE.md` - Database layer documentation
+- `internal/models/CLAUDE.md` - Data models documentation
+- `internal/tui/CLAUDE.md` - TUI documentation
 
 ## Project History
 
-Originally prototyped in Next.js/React, the project was rewritten in Rust in January 2026 to:
-- Reduce resource usage (152x smaller binary)
-- Enable embedded deployment (Raspberry Pi Zero 2 W)
-- Optimize for e-ink displays
-- Improve battery life (2-4x longer)
-- Simplify architecture
-
-The Next.js prototype documentation is preserved in `docs/archive/` for reference.
+Originally prototyped in Next.js/React, then rewritten in Rust, and now migrated to Go in January 2026 to:
+- Simplify deployment and dependencies
+- Leverage Go's excellent tooling and testing ecosystem
+- Use BubbleTea for a modern terminal UI
+- Enable easy cross-compilation
 
 ---
 
-**Built with Rust 🦀 • Powered by OpenAI • Inspired by Neal Stephenson**
+**Built with Go • Powered by OpenAI GPT-5 • Inspired by Neal Stephenson**

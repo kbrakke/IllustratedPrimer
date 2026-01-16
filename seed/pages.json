@@ -1,0 +1,38 @@
+[
+  {
+    "id": "page-001",
+    "story_id": "story-nellodee-001",
+    "page_num": 1,
+    "prompt": "Tell me about the princess discovering the hidden garden gate",
+    "completion": "Princess Nellodee was walking through the castle grounds when she noticed something peculiar behind the old rose bushes. There, covered in ivy and morning glories, was a beautiful wooden gate she had never seen before. The gate was painted in shimmering silver and gold, with intricate carvings of butterflies and flowers. Her heart raced with excitement as she gently pushed it open, revealing a secret garden beyond.",
+    "summary": "Princess discovers a hidden magical garden gate behind the rose bushes",
+    "image_path": null,
+    "audio_path": null,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
+  },
+  {
+    "id": "page-002",
+    "story_id": "story-nellodee-001",
+    "page_num": 2,
+    "prompt": "What does she find in the magical garden?",
+    "completion": "As Nellodee stepped through the gate, she gasped in wonder. The garden was unlike anything she had ever seen! Flowers of every color imaginable swayed gently in the breeze, each one seeming to hum a soft melody. In the center stood a magnificent rainbow fountain, its waters sparkling with all the colors of the rainbow. As she approached, three friendly butterflies - one red, one blue, and one yellow - landed on her outstretched hand.",
+    "summary": "The magical garden contains singing flowers and a rainbow fountain with three colorful butterfly friends",
+    "image_path": null,
+    "audio_path": null,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
+  },
+  {
+    "id": "page-003",
+    "story_id": "story-nellodee-001",
+    "page_num": 3,
+    "prompt": "How do the butterflies teach her about friendship?",
+    "completion": "The three butterflies introduced themselves as Ruby, Sapphire, and Sunny. They explained that they were the guardians of the garden. 'We may all look different,' said Ruby, 'with different colors and patterns, but we work together to keep this garden beautiful.' Sapphire added, 'Just like the flowers need different colors to make a rainbow, friends are special because of their differences!' Sunny flew in a happy circle and said, 'And when we help each other, we can do amazing things!' The princess smiled, understanding that true friendship celebrates what makes each person unique.",
+    "summary": "The three butterflies teach Princess Nellodee that friendship celebrates differences and working together",
+    "image_path": null,
+    "audio_path": null,
+    "created_at": 1704067200,
+    "updated_at": 1704067200
+  }
+]

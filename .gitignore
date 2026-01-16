@@ -1,14 +1,20 @@
-# Rust
-/target
-Cargo.lock
-*.db-shm
-*.db-wal
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Coverage
+coverage.out
+coverage.html
 
 # Environment
 .env
-
-# Database
-data.db
 
 # OS
 .DS_Store
@@ -22,4 +28,11 @@ data.db
 *~
 
 # Logs
+logs/
 *.log
+
+# Build artifacts
+vendor/
+
+# Claude Code local settings
+.claude/settings.local.json

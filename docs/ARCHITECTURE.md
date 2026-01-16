@@ -1,118 +1,111 @@
-# Illustrated Primer TUI - Architecture Documentation
+# Illustrated Primer - Architecture Documentation
 
 ## Overview
 
-The Rust TUI implementation of Illustrated Primer is a terminal-based application designed for testing core business logic and AI integration without the overhead of a web server. This architecture prioritizes simplicity, performance, and embedded system compatibility.
+The Go implementation of Illustrated Primer is a terminal-based educational storytelling application. It uses BubbleTea for the terminal UI, PostgreSQL for persistence, and OpenAI's GPT-5 Responses API for AI-powered story generation.
 
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         TUI Layer                            │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │  EventHandler│  │  UI Renderer │  │  App State   │       │
-│  │  (Crossterm) │  │  (Ratatui)   │  │  Machine     │       │
-│  └──────┬───────┘  └──────▲───────┘  └──────┬───────┘       │
-│         │                  │                  │               │
-└─────────┼──────────────────┼──────────────────┼───────────────┘
-          │                  │                  │
-          ▼                  │                  ▼
+│                         TUI Layer                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  BubbleTea   │  │   Lipgloss   │  │   App State  │      │
+│  │  (Events)    │  │  (Styling)   │  │   Machine    │      │
+│  └──────┬───────┘  └──────▲───────┘  └──────┬───────┘      │
+│         │                 │                  │              │
+└─────────┼─────────────────┼──────────────────┼──────────────┘
+          │                 │                  │
+          ▼                 │                  ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      Business Logic                          │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │  App Modes: UserSelection → StoryList → StoryView    │  │
-│  │             → Chat → (loop back to Chat)              │  │
-│  └───────────────────────────────────────────────────────┘  │
-└──────────────────┬──────────────────────┬────────────────────┘
+│                      Business Logic                         │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │  App Modes: UserSelection → StoryList → StoryView     │ │
+│  │             → Chat → (loop back to Chat)              │ │
+│  └───────────────────────────────────────────────────────┘ │
+└──────────────────┬──────────────────────┬───────────────────┘
                    │                      │
           ┌────────▼────────┐    ┌───────▼────────┐
           │   DB Layer      │    │   AI Layer     │
-          │   (sqlx)        │    │   (OpenAI)     │
+          │   (pgx)         │    │   (OpenAI)     │
           └────────┬────────┘    └───────┬────────┘
                    │                      │
           ┌────────▼────────┐    ┌───────▼────────┐
-          │   SQLite DB     │    │  OpenAI API    │
-          │   (Embedded)    │    │  (gpt-4-turbo) │
+          │   PostgreSQL    │    │  OpenAI API    │
+          │   Database      │    │  (GPT-5)       │
           └─────────────────┘    └────────────────┘
 ```
 
 ## Module Structure
 
-### 1. Models (`src/models/`)
+### 1. Models (`internal/models/`)
 
-Defines the core data structures that map directly to database tables.
+Defines core data structures shared across all layers.
 
 **Files:**
-- `user.rs` - User model with authentication info
-- `story.rs` - Story model with metadata
-- `page.rs` - Page model representing conversation turns
+- `user.go` - User model with profile info
+- `story.go` - Story model with metadata
+- `page.go` - Page model representing conversation turns
 
 **Key Design Decisions:**
-- Integer timestamps (Unix epoch) for embedded system compatibility
-- Optional fields for incomplete features (image_path, audio_path)
-- Helper methods for datetime conversion
-- Serde serialization for future API compatibility
+- UUID strings for all entity IDs
+- Unix timestamps (int64) for created_at/updated_at
+- Pointer types for optional fields (*string, *int64)
+- JSON struct tags for serialization
+- Factory methods (NewUser, NewStory, NewPage)
 
-**Reference:**
-- [Rust Serde Documentation](https://serde.rs/)
-- [SQLx FromRow Derive](https://docs.rs/sqlx/latest/sqlx/trait.FromRow.html)
+### 2. Database Layer (`internal/db/`)
 
-### 2. Database Layer (`src/db/`)
-
-Provides async database operations using sqlx with SQLite.
+Provides database operations using pgx with PostgreSQL.
 
 **Files:**
-- `connection.rs` - Database connection pooling and migration
-- `user.rs` - CRUD operations for users
-- `story.rs` - CRUD operations for stories
-- `page.rs` - CRUD operations for pages
+- `database.go` - Connection pool, migrations, configuration
+- `user.go` - User CRUD operations
+- `story.go` - Story CRUD operations
+- `page.go` - Page CRUD operations
 
-**Optimization Features:**
-- WAL (Write-Ahead Logging) mode for better concurrency
-- Foreign key constraints enforced at DB level
-- Compound indexes for common query patterns
-- STRICT tables for type safety (SQLite 3.37+)
-- Integer timestamps to avoid datetime parsing overhead
+**Features:**
+- Connection pooling via pgxpool (max 5 connections)
+- Embedded migration SQL
+- Foreign key constraints with cascading deletes
+- Context-based operations for cancellation
+- Custom error types (ErrUserNotFound, etc.)
 
-**Reference:**
-- [SQLx Documentation](https://docs.rs/sqlx/latest/sqlx/)
-- [SQLite WAL Mode](https://www.sqlite.org/wal.html)
-- [SQLite STRICT Tables](https://www.sqlite.org/stricttables.html)
+**Testing:**
+- Integration tests use testcontainers-go for PostgreSQL
+- Build tag: `integration`
 
-### 3. AI Layer (`src/ai/`)
+### 3. AI Layer (`internal/ai/`)
 
-Handles communication with OpenAI API for story generation.
+Handles communication with OpenAI's GPT-5 Responses API.
 
 **Files:**
-- `openai.rs` - OpenAI client wrapper with streaming support
-- `prompt.rs` - Educational prompt templates
+- `client.go` - OpenAI client with streaming support
+- `prompt.go` - Educational prompt templates
 
 **Key Features:**
-- Async streaming responses via tokio channels
+- Both blocking and streaming response methods
 - Conversation history management
-- System prompt engineering for age-appropriate content
-- Error handling and retry logic (future enhancement)
+- Configurable model selection (gpt-5, gpt-5-mini, gpt-5-nano)
+- Token budget management for reasoning models
+- Functional options pattern for configuration
 
-**Educational Prompt Engineering:**
-The system prompt is optimized for:
-- Ages 2-8 educational content
-- Warm, friendly teacher persona
-- Balancing story flow with learning tangents
-- Age-appropriate vocabulary and concepts
+**Token Configuration:**
+GPT-5 models are reasoning models that allocate output tokens to both internal reasoning and the response. Default is 4096 tokens to ensure sufficient budget for both.
 
-**Reference:**
-- [async-openai Crate](https://docs.rs/async-openai/latest/async_openai/)
-- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference/chat)
-- [Tokio Channels](https://docs.rs/tokio/latest/tokio/sync/mpsc/index.html)
+**Testing:**
+- Real API tests with gpt-5-nano
+- Build tag: `ai`
+- Requires: `AI_TESTS_ENABLED=true`
 
-### 4. TUI Layer (`src/tui/`)
+### 4. TUI Layer (`internal/tui/`)
 
-Terminal user interface built with Ratatui and Crossterm.
+Terminal interface built with BubbleTea and Lipgloss.
 
 **Files:**
-- `app.rs` - Application state machine and business logic
-- `ui.rs` - UI rendering functions
-- `events.rs` - Keyboard/mouse event handling
+- `app.go` - Application state machine and BubbleTea Model
+- `views.go` - Rendering functions with Lipgloss styling
+- `keys.go` - Key binding definitions
 
 **App State Machine:**
 ```
@@ -128,21 +121,23 @@ UserSelection → (select user) → StoryList
 ```
 
 **Keyboard Controls:**
-- `↑/↓` - Navigate lists
+- `↑/↓` or `k/j` - Navigate lists
 - `Enter` - Select/Submit
 - `Esc` - Go back
-- `Ctrl+Q` - Quit application
+- `q` or `Ctrl+C` - Quit application
 - `n` - Create new story (in StoryList mode)
 
-**E-ink Optimization:**
-- Pure black/white color scheme
-- Minimal UI updates (only on events)
-- Text-focused design with clear hierarchy
+### 5. Seed Data (`internal/seed/`)
 
-**Reference:**
-- [Ratatui Documentation](https://ratatui.rs/)
-- [Crossterm Documentation](https://docs.rs/crossterm/latest/crossterm/)
-- [Terminal UI Patterns](https://github.com/ratatui-org/ratatui/tree/main/examples)
+Loads example data from JSON files.
+
+**Files:**
+- `loader.go` - JSON parsing and database insertion
+
+**Usage:**
+```bash
+./bin/primer --seed
+```
 
 ## Data Flow
 
@@ -163,291 +158,173 @@ TUI: Switch to Chat mode
 ```
 User Input: "Tell me about dinosaurs"
     ↓
-TUI: Add to input_buffer
+TUI: Capture in inputBuffer
     ↓
 Business Logic:
-  - Extract conversation_history
-  - Call AI layer
+  - Build conversation history
+  - Call AI layer (streaming)
     ↓
 AI Layer:
   - Build messages array (system + history + user)
   - Stream response from OpenAI
     ↓
 Business Logic:
-  - Collect full response
+  - Collect streamed chunks
   - Create Page model
-  - Save to DB
-  - Update conversation_history
+  - Save to database
     ↓
 TUI: Re-render with new page
 ```
 
 ## Database Schema
 
-### Optimizations from Original
+### Tables
 
-1. **Integer Timestamps**: Unix epoch instead of TEXT ISO8601
-   - Faster comparisons
-   - Native SQLite INTEGER type
-   - 8 bytes vs variable TEXT
+**users:**
+- `id` (UUID, primary key)
+- `name`, `email`, `image` (optional)
+- `email_verified` (Unix timestamp)
+- `created_at`, `updated_at` (Unix timestamps)
 
-2. **STRICT Mode**: Type safety at DB level
-   - Prevents type affinity issues
-   - Better performance (no conversion checks)
-   - Catches bugs early
+**stories:**
+- `id` (UUID, primary key)
+- `user_id` (foreign key → users)
+- `title`, `summary`
+- `current_page` (integer)
+- `created_at`, `updated_at`
 
-3. **Indexed Lookups**:
-   - `idx_stories_user_id` - Fast story listing per user
-   - `idx_pages_story_page` - Compound index for unique constraint + range queries
-   - `idx_sessions_token` - Fast session validation
+**pages:**
+- `id` (UUID, primary key)
+- `story_id` (foreign key → stories)
+- `page_num` (unique per story)
+- `prompt`, `completion`, `summary`
+- `image_path`, `audio_path` (future use)
+- `created_at`, `updated_at`
 
-4. **File Paths Instead of Base64**:
-   - `image_path` and `audio_path` fields
-   - Reduces DB bloat (previous: 458KB embedded image)
-   - Enables efficient streaming for large media
+### Indexes
+- `idx_stories_user_id` - Fast story listing per user
+- `idx_pages_story_id` - Fast page listing per story
 
-5. **WAL Mode Benefits**:
-   - Readers don't block writers
-   - Better concurrency for embedded systems
-   - Crash recovery without corruption
+## Configuration
 
-**Reference:**
-- [SQLite Performance Tuning](https://www.sqlite.org/optoverview.html)
-- [Integer vs Text Performance](https://www.sqlite.org/datatype3.html)
+### Environment Variables
 
-## Performance Characteristics
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENAI_API_KEY` | Yes | - | OpenAI API key |
+| `DATABASE_URL` | No | localhost | PostgreSQL connection URL |
+| `OPENAI_MODEL` | No | gpt-5 | Model to use |
+| `OPENAI_MAX_TOKENS` | No | 4096 | Max output tokens |
+| `OPENAI_ORG_ID` | No | - | Organization ID |
 
-### Binary Size (Release Build)
+### AI Model Options
 
-Expected metrics with `opt-level = "z"` and LTO:
-- Binary size: ~12-15 MB (stripped)
-- Memory usage: ~20-30 MB (runtime)
-- Startup time: <500ms
+| Model | Use Case |
+|-------|----------|
+| `gpt-5` | Production (default) |
+| `gpt-5-mini` | Faster, cheaper |
+| `gpt-5-nano` | Testing (very cheap) |
 
-Compare to Next.js:
-- node_modules: 547 MB
-- Memory: 200+ MB
-- Startup: 5-10 seconds
+## Testing Strategy
 
-**Reference:**
-- [Rust Optimization Levels](https://doc.rust-lang.org/cargo/reference/profiles.html)
-- [Link-Time Optimization](https://doc.rust-lang.org/rustc/linker-plugin-lto.html)
+### Unit Tests
+```bash
+make test-unit
+```
+- Model factory methods
+- Helper functions
+- No external dependencies
 
-### Database Performance
+### Integration Tests
+```bash
+make test-integration
+```
+- Database CRUD operations
+- Uses testcontainers for PostgreSQL
+- Requires Docker
 
-- SQLite CRUD operations: <1ms (local SSD)
-- Full story with 100 pages load: ~10-20ms
-- WAL checkpoint: Async, non-blocking
+### AI Tests
+```bash
+make test-ai
+```
+- Real OpenAI API calls
+- Uses gpt-5-nano for cost efficiency
+- Requires `OPENAI_API_KEY`
 
-### AI Response Times
+## Error Handling
 
-- Network latency to OpenAI: 100-500ms (variable)
-- Token streaming: Real-time display
-- Full response (500 tokens): 5-10 seconds typical
-
-## Error Handling Strategy
-
-### Layered Error Propagation
-
+### Layered Approach
 ```
 UI Layer     → Display user-friendly message
    ↓
 Business     → Log error, update status
    ↓
-DB/AI        → Return Result<T, Error>
+DB/AI        → Return error with context
 ```
 
-Using `anyhow::Result` for flexibility:
-- Context-rich error messages
-- Easy propagation with `?` operator
-- Conversion from any error type
-
-**Reference:**
-- [Anyhow Error Handling](https://docs.rs/anyhow/latest/anyhow/)
-- [Rust Error Handling Book](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
-
-## Async Runtime
-
-### Tokio Configuration
-
-Using Tokio for:
-- Async database operations (sqlx)
-- OpenAI API calls with streaming
-- Future: WebSocket support for web UI
-
-**Multi-threaded runtime** (`tokio::main`):
-- Work-stealing scheduler
-- Efficient for I/O-bound tasks
-- Minimal overhead for small workloads
-
-**Reference:**
-- [Tokio Runtime](https://docs.rs/tokio/latest/tokio/runtime/index.html)
-- [Async Rust Book](https://rust-lang.github.io/async-book/)
+### Custom Errors
+- `ErrUserNotFound` - User does not exist
+- `ErrStoryNotFound` - Story does not exist
+- `ErrPageNotFound` - Page does not exist
 
 ## Security Considerations
 
 ### Current Implementation
-
-1. **API Key Management**:
-   - Environment variable (not hardcoded)
-   - .env file excluded from git
-   - Future: Secure key storage for embedded
-
-2. **SQL Injection Protection**:
-   - SQLx compile-time query verification
-   - Parameterized queries only
-   - No string concatenation
-
-3. **User Input Sanitization**:
-   - Currently minimal (TUI context)
-   - Future API: Input validation required
+1. **API Key Management**: Environment variables, .env excluded from git
+2. **SQL Injection Protection**: Parameterized queries via pgx
+3. **Input Handling**: Minimal validation (TUI context)
 
 ### Future Enhancements
-
-- Local authentication (PIN/password)
-- Encrypted database (SQLCipher)
-- Rate limiting for AI calls
+- User authentication
 - Content filtering for child safety
+- Rate limiting for AI calls
 
-**Reference:**
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [SQLCipher](https://www.zetetic.net/sqlcipher/)
+## Dependencies
 
-## Testing Strategy
+### Core
+- `github.com/charmbracelet/bubbletea` - Terminal UI framework
+- `github.com/charmbracelet/lipgloss` - Styling
+- `github.com/charmbracelet/bubbles` - UI components
+- `github.com/jackc/pgx/v5` - PostgreSQL driver
+- `github.com/google/uuid` - UUID generation
 
-### Unit Tests
-- Model serialization/deserialization
-- Database CRUD operations (with test DB)
-- Prompt template generation
+### Development
+- `github.com/testcontainers/testcontainers-go` - Integration testing
+- `github.com/joho/godotenv` - Environment loading
 
-### Integration Tests
-- Full story creation flow
-- Chat conversation persistence
-- User session management
+## Build and Deployment
 
-### Manual Testing
-- TUI navigation flows
-- OpenAI API integration
-- Database migration
-
-**Reference:**
-- [Rust Testing Guide](https://doc.rust-lang.org/book/ch11-00-testing.html)
-- [SQLx Testing](https://docs.rs/sqlx/latest/sqlx/attr.test.html)
-
-## Future Architecture Evolution
-
-### Phase 1: Current (TUI)
-- Terminal-only interface
-- Direct DB access
-- Synchronous AI calls
-
-### Phase 2: Add API Server (Planned)
-```
-    TUI Client              Web Client
-         │                      │
-         └──────────┬───────────┘
-                    │
-              REST/WebSocket API
-                    │
-            ┌───────┴────────┐
-            │   Axum Server  │
-            └───────┬────────┘
-                    │
-         ┌──────────┴──────────┐
-         │                     │
-    DB Layer               AI Layer
-```
-
-### Phase 3: Embedded Deployment
-- Cross-compile for ARM
-- Systemd service
-- E-ink display driver integration
-- Battery optimization
-
-**Reference:**
-- [Axum Web Framework](https://docs.rs/axum/latest/axum/)
-- [Cross-Compilation](https://rust-lang.github.io/rustup/cross-compilation.html)
-- [Embedded Rust](https://docs.rust-embedded.org/)
-
-## Development Guidelines
-
-### Code Style
-- Clean, minimal comments (prefer self-documenting code)
-- Comprehensive documentation in separate markdown files
-- Use clippy for linting: `cargo clippy`
-- Format with rustfmt: `cargo fmt`
-
-### Commit Strategy
-- Atomic commits per feature
-- Conventional commit messages
-- Reference architecture docs in PRs
-
-### Dependency Management
-- Minimize dependencies (current: 17 direct deps)
-- Prefer well-maintained crates
-- Regular `cargo audit` for security
-
-**Reference:**
-- [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
-- [Clippy Lints](https://rust-lang.github.io/rust-clippy/)
-- [Cargo Audit](https://crates.io/crates/cargo-audit)
-
-## Deployment Targets
-
-### Development (macOS/Linux/Windows)
-- Native compilation
-- SQLite file-based DB
-- Terminal emulator required
-
-### Raspberry Pi (ARM)
+### Development
 ```bash
-rustup target add aarch64-unknown-linux-gnu
-cargo build --release --target aarch64-unknown-linux-gnu
+go run ./cmd/primer
 ```
 
-### E-ink Device (Future)
-- Requires custom display driver
-- Potential targets: reMarkable, Kindle, custom hardware
-- May need framebuffer integration
+### Production
+```bash
+make build
+./bin/primer
+```
 
-**Reference:**
-- [Rust Cross Compilation](https://github.com/cross-rs/cross)
-- [Raspberry Pi Deployment](https://opensource.com/article/19/3/physical-computing-rust-raspberry-pi)
+### Docker
+```dockerfile
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o primer ./cmd/primer
 
-## Monitoring and Logging
+FROM alpine:latest
+COPY --from=builder /app/primer /primer
+CMD ["/primer"]
+```
 
-### Tracing Setup
-- `tracing` crate for structured logging
-- Log levels: ERROR, WARN, INFO, DEBUG, TRACE
-- Environment variable: `RUST_LOG=info`
+## Project History
 
-### Key Events Logged
-- Database initialization and migration
-- OpenAI API calls and errors
-- User navigation flow
-- Performance metrics (future)
+Originally prototyped in Next.js/React, then rewritten in Rust, and migrated to Go in January 2026 to:
+- Simplify deployment and dependencies
+- Leverage Go's excellent tooling and testing ecosystem
+- Use BubbleTea for a modern terminal UI
+- Enable easy cross-compilation
 
-**Reference:**
-- [Tracing Documentation](https://docs.rs/tracing/latest/tracing/)
-- [Logging Best Practices](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html)
+---
 
-## Resources and Learning
-
-### Essential Rust References
-- [The Rust Book](https://doc.rust-lang.org/book/)
-- [Async Programming in Rust](https://rust-lang.github.io/async-book/)
-- [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
-
-### Key Crate Documentation
-- [Tokio](https://tokio.rs/)
-- [SQLx](https://docs.rs/sqlx/)
-- [Ratatui](https://ratatui.rs/)
-- [Serde](https://serde.rs/)
-
-### Terminal UI Resources
-- [Ratatui Book](https://ratatui.rs/tutorials/)
-- [TUI Design Patterns](https://github.com/ratatui-org/ratatui/tree/main/examples)
-
-### OpenAI Integration
-- [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
-- [GPT-4 Best Practices](https://platform.openai.com/docs/guides/gpt-best-practices)
+**Built with Go | Powered by OpenAI GPT-5 | Inspired by Neal Stephenson**
